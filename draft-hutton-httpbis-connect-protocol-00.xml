@@ -106,13 +106,10 @@
 
     <abstract>
       <t>
-        This document describes a mechanism to enable HTTP Clients to provide an
-        indication within a HTTP Connect request as to which protocol will be
-        used within the tunnel established to the Server identified by the
-        target resource. The tunneled protocol is declared using the
-        Tunnel-Protocol HTTP Request header field. Label usage relating to the
-        use of HTTP Connect by WebRTC clients (e.g. turn, webrtc) are described
-        in this document.
+        This document describes a mechanism to enable HTTP clients to provide an
+        indication within a HTTP CONNECT request as to which application
+        protocol or protocols will be used within the tunnel. The application
+        protocol is declared using the HTTP request header field.
       </t>
     </abstract>
 
@@ -124,40 +121,44 @@
 
     <section title="Introduction">
       <t>
-        The HTTP Connect method (Section 4.3.6 of <xref
-        target="RFC7231"/>) requests that the recipient establish a tunnel
-        to the destination origin server identified by the request-target and
-        thereafter forward packets, in both directions, until the tunnel is
-        closed. Such tunnels are commonly used to create end-to-end virtual
-        connections, through one or more proxies, which may then be secured
-        using TLS (Transport Layer Security, <xref target="RFC5246"/>).
+        The HTTP Connect method (Section 4.3.6 of <xref target="RFC7231"/>)
+        requests that a proxy establish a tunneled TCP connection to a
+        destination server.  The server is identified by the request-target and,
+        once established, packets are forwarded by the proxy in both directions,
+        until the tunnel is closed.  Such tunnels are commonly used to create
+        end-to-end virtual connections, through one or more proxies, which may
+        then be secured using TLS (Transport Layer Security, <xref
+        target="RFC5246"/>).
       </t>
       <t>
         The RTCWEB use cases and requirements document <xref
         target="I-D.ietf-rtcweb-use-cases-and-requirements"/> includes a
-        requirement that a WebRTC Client must be able to send streams and data
-        to a peer in the presence of Firewalls that only allow traffic via a
-        HTTP Proxy, when Firewall policy allows WebRTC traffic. To facilitate
+        requirement that a WebRTC client be able to send streams and data
+        to a peer in the presence of firewalls that only allow traffic via a
+        HTTP proxy, when permitted by firewall policy. To facilitate
         this and to allow such a HTTP Proxy to be provided with an indication
         that WebRTC related real-time media is to be included in the tunnel this
-        specification defines the Tunnel-Protocol Request header field and
-        associated labels. This allows the proxy to identify the protocol being
-        used in the tunnel as early as possible therefore enabling the proxy to
-        make informed policy decisions. The type of policy decisions the proxy
-        may make is not specified here but may include rejecting the request
-        with a HTTP status code responses or prioritizing connections. As
-        described in Section 4.3.6 of <xref target="RFC7231"/> and 2xx
-        response indicates consent for the client to switch to tunnel mode.
+        specification defines the Tunnel-Protocol Request header field.
+      </t>
+      <t>
+        The Tunnel-Protocol header field allows the proxy to identify the
+        protocol being used in the tunnel as early as possible, thereby
+        allowing the proxy to make informed policy decisions. The type of policy
+        decisions the proxy may make is not specified here but could include
+        rejecting the request with a HTTP status code responses or prioritizing
+        connections. As described in Section 4.3.6 of <xref target="RFC7231"/>
+        and 2xx response indicates consent for the client to switch to tunnel
+        mode.
       </t>
       <t>
         The HTTP Tunnel-Protocol header field may be used in conjunction with
         and complements the application layer next protocol extension <xref
         target="I-D.ietf-tls-applayerprotoneg"/> specified for TLS <xref
-        target="RFC5246"/>".  In the scenario where the HTTP Connect is
-        used to establish a TLS tunnel then the HTTP Tunnel-Protocol may be used
+        target="RFC5246"/>.  In the scenario where the HTTP CONNECT is used to
+        establish a TLS tunnel then the Tunnel-Protocol header field can be used
         to carry the same next protocol label as carried within the TLS
-        handshake. However, the HTTP-Protocol is an indication rather a
-        negotiation since the HTTP Proxy does not implement the tunneled
+        handshake. However, the Tunnel-Protocol is an indication rather a
+        negotiation since the HTTP proxy does not implement the tunneled
         protocol. ALPN Labels are already defined for TURN in <xref
         target="I-D.patil-tram-alpn"/> and WebRTC <xref
         target="I-D.thomson-rtcweb-alpn"/> and are re-used here.
@@ -176,11 +177,11 @@
         The following two use cases are considered:
         <list style="symbols">
           <t>
-            The WebRTC Client issues a HTTP CONNECT request to the HTTP proxy
+            The WebRTC client issues a HTTP CONNECT request to the HTTP proxy
             with the TURN server address in the Request URI.
           </t>
           <t>
-            The WebRTC Client issues a HTTP CONNECT request to the HTTP proxy
+            The WebRTC client issues a HTTP CONNECT request to the HTTP proxy
             with the TCP address of a WebRTC peer in the Request URI.  This is
             used in the case of establishing ICE-TCP <xref target="RFC6544"/>
             with a WebRTC Peer.
@@ -209,7 +210,7 @@
       <section title="Syntax">
         <t>
           The ABNF (Augmented Backus-Naur Form) syntax for the Tunnel-Protocol
-          header field is given below.  It is based on the Generic Grammar
+          header field is given below.  It is based on the generic grammar
           defined in Section 2 of <xref target="RFC7230"/>.
         </t>
         <figure>
@@ -227,7 +228,7 @@ protocol-extension = token
           target="I-D.ietf-rtcweb-transports"/> requires that a WebRTC client
           support the modes of TURN that uses TCP and TLS between the client and
           the TURN server in order to deal with firewalls blocking UDP
-          traffic. In the case where HTTP Connect is used to establish a tunnel
+          traffic. In the case where HTTP CONNECT is used to establish a tunnel
           to the TURN server the client SHOULD include the "Tunnel-Protocol"
           header field with the value "turn" <xref
           target="I-D.patil-tram-alpn"/> as shown in the example below.
@@ -281,13 +282,14 @@ Tunnel-Protocol: webrtc
 
     <section anchor="Security" title="Security Considerations">
       <t>
-        In case of using HTTP CONNECT to a TURN server the security
-        consideration of <xref target="RFC7231"/>, Section-4.3.6] apply. It
-        states that there "are significant risks in establishing a tunnel to
-        arbitrary servers, particularly when the destination is a well-known or
-        reserved TCP port that is not intended for Web traffic. Proxies that
-        support CONNECT SHOULD restrict its use to a limited set of known ports
-        or a configurable whitelist of safe request targets."
+        In case of using HTTP CONNECT to establish a tunnel to a TURN server,
+        the security consideration of <xref target="RFC7231"/>, Section-4.3.6]
+        apply. It states that there "are significant risks in establishing a
+        tunnel to arbitrary servers, particularly when the destination is a
+        well-known or reserved TCP port that is not intended for Web
+        traffic. Proxies that support CONNECT SHOULD restrict its use to a
+        limited set of known ports or a configurable whitelist of safe request
+        targets."
       </t>
       <t>
         The Tunnel-Protocol request header field described in this document is

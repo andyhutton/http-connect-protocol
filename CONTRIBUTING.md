@@ -1,10 +1,4 @@
-# HTTP CONNECT Application Protocol
-
-* [Editor's copy](https://andyhutton.github.io/http-connect-protocol/)
-* [Last Submission] (https://tools.ietf.org/html/draft-hutton-httpbis-connect-protocol)
-
-
-## Contributing
+# Contributing
 
 Before submitting feedback, please familiarize yourself with our current issues
 list and review the working group home page for both
